@@ -58,5 +58,6 @@ pub async fn stop(ctx: &Context, msg: &Message) -> CommandResult {
     } else {
         check_msg(msg.channel_id.say(&ctx.http, "Not in a voice channel to stop playback").await);
     }
+    manager.remove(guild_id).await.expect("Leave failed");
     Ok(())
 }

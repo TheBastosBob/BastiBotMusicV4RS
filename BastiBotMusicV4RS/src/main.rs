@@ -17,7 +17,10 @@ use songbird::SerenityInit;
 use crate::commands::play::*;
 use crate::commands::version::*;
 use crate::commands::stop::*;
-
+use crate::commands::skip::*;
+use crate::commands::pause::*;
+use crate::commands::resume::*;
+use crate::commands::queue::*;
 
 
 
@@ -40,7 +43,7 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
 
 
 #[group]
-#[commands(ping, play, version, stop)]
+#[commands(ping, play, version, stop, skip, pause, resume, queue)]
 struct General;
 
 #[tokio::main]

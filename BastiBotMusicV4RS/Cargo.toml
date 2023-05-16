@@ -7,12 +7,15 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
-songbird = "0.3.2"
 url = "2.2"
 
 [dependencies.serenity]
 version = "0.11.5"
-features = ["voice"]
+features = ["voice", "cache", "framework", "standard_framework", "utils"]
+
+[dependencies.songbird]
+version = "0.3.2"
+features = ["builtin-queue"]
 
 [lib]
 name = "my_project"
