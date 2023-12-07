@@ -3,7 +3,6 @@ use serenity::client::Context;
 
 use serenity::{
     async_trait,
-    client::bridge::gateway::ShardId,
     framework::StandardFramework,
     framework::standard::{
         macros::{group},
@@ -13,26 +12,6 @@ use serenity::{
     model::prelude::Message,
     prelude::*,
 };
-
-use songbird::SerenityInit;
-use songbird::{
-    input::{self
-            , restartable::Restartable,
-    },
-    Event, Driver, EventContext, EventHandler as VoiceEventHandler, Songbird, TrackEvent, Call,
-};
-
-
-use url::Url;
-
-use std::{sync::Arc, time::Duration,
-          sync::{
-              atomic::{AtomicUsize, Ordering},
-          }, };
-use std::alloc::handle_alloc_error;
-use serenity::model::id::GuildId;
-use songbird::driver::Bitrate;
-use songbird::driver::opus::ffi::opus_get_version_string;
 use crate::utils::check_msg;
 
 #[command]

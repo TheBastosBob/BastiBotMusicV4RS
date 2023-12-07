@@ -3,7 +3,6 @@ use serenity::client::Context;
 
 use serenity::{
     async_trait,
-    client::bridge::gateway::ShardId,
     framework::StandardFramework,
     framework::standard::{
         macros::{group},
@@ -15,13 +14,8 @@ use serenity::{
 };
 
 use songbird::SerenityInit;
-use songbird::{
-    input::{self
-    , restartable::Restartable
-    },
-    Event,Driver, EventContext, EventHandler as VoiceEventHandler, Songbird, TrackEvent, Call,
-};
-
+use songbird::input::YoutubeDl;
+use reqwest::Client as HttpClient;
 
 use url::Url;
 
@@ -34,6 +28,13 @@ use serenity::model::id::GuildId;
 use songbird::driver::Bitrate;
 use songbird::driver::opus::ffi::opus_get_version_string;
 use crate::utils::check_msg;
+
+struct HttpKey;
+
+impl TypeMapKey for HttpKey {
+    type Value = HttpClient;
+}
+
 
 pub struct EventConfig {
     pub ctx: Context,
@@ -54,6 +55,14 @@ pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let channel_id = guild
         .voice_states.get(&msg.author.id)
         .and_then(|voice_state| voice_state.channel_id);
+
+    let http_client = {
+        let data = ctx.data.read().await;
+        data.get::<HttpKey>()
+            .cloned()
+            .expect("Guaranteed to exist in the typemap.")
+    };
+
 
     let url = match args.single::<String>() {
         Ok(url) => url,
@@ -88,26 +97,16 @@ pub async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler  = handler_lock.lock().await;
-        let source = match Restartable::ytdl(url, true).await {
-            Ok(source) => source,
-            Err(why) => {
-                println!("Err starting source: {:?}", why);
+        let source = YoutubeDl::new(http_client, url);
 
-                check_msg(msg.channel_id.say(&ctx.http, "Error sourcing ffmpeg").await);
-
-                return Ok(());
-            }
-        };
-
-
-        handler.enqueue_source(source.into());
+        handler.enqueue(source.into()).await;
 
         let return_message;
         if handler.queue().len() > 1
         {
-            return_message = format!("Added song : {} to queue at {}", handler.queue().current().unwrap().metadata().title.as_ref().unwrap(), handler.queue().len());
+            return_message = format!("Added song : {} to queue at {}", "", handler.queue().len());
         } else {
-            return_message = format!("Now playing: {}", handler.queue().current().unwrap().metadata().title.as_ref().unwrap());
+            return_message = format!("Now playing: {}", "");
         }
 
         check_msg(msg.channel_id.say(&ctx.http,  return_message).await);

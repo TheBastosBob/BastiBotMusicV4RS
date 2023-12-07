@@ -3,7 +3,6 @@ use serenity::client::Context;
 
 use serenity::{
     async_trait,
-    client::bridge::gateway::ShardId,
     framework::standard::{
         macros::{ group},
         Args,  CommandGroup, HelpOptions,
@@ -13,11 +12,6 @@ use serenity::{
     prelude::*,
 };
 
-use songbird::SerenityInit;
-use songbird::{
-    input::{self, Restartable},
-    Event, EventContext, EventHandler as VoiceEventHandler, Songbird, TrackEvent, Call
-};
 use crate::utils::check_msg;
 
 

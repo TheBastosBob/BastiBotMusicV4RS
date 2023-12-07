@@ -3,7 +3,6 @@ use serenity::client::Context;
 
 use serenity::{
     async_trait,
-    client::bridge::gateway::ShardId,
     framework::StandardFramework,
     framework::standard::{
         macros::{group},
@@ -12,14 +11,6 @@ use serenity::{
     model::{gateway::Ready, id::ChannelId},
     model::prelude::Message,
     prelude::*,
-};
-
-use songbird::SerenityInit;
-use songbird::{
-    input::{self
-            , restartable::Restartable,
-    },
-    Event, Driver, EventContext, EventHandler as VoiceEventHandler, Songbird, TrackEvent, Call,
 };
 
 
@@ -37,7 +28,7 @@ use crate::utils::check_msg;
 
 #[command]
 #[only_in(guilds)]
-pub async fn skip(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+pub async fn resume(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild = msg
         .guild(&ctx.cache)
         .unwrap();
@@ -56,12 +47,12 @@ pub async fn skip(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
-        let queue = handler.queue();
-        let _ = queue.skip();
+        let queue = handler.queue();;
+        let _ = queue.resume();
 
-        check_msg(msg.channel_id.say(&ctx.http, format!("Song skipped: {} in queue.", queue.len())).await);
+        check_msg(msg.channel_id.say(&ctx.http, format!("Song paused")).await);
     } else {
-        check_msg(msg.channel_id.say(&ctx.http, "Not in a voice channel to play in").await);
+        check_msg(msg.channel_id.say(&ctx.http, "Not in a voice channel to pause in").await);
     }
     Ok(())
 }

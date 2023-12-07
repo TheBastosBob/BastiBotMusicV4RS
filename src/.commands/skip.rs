@@ -3,7 +3,6 @@ use serenity::client::Context;
 
 use serenity::{
     async_trait,
-    client::bridge::gateway::ShardId,
     framework::StandardFramework,
     framework::standard::{
         macros::{group},
@@ -15,12 +14,6 @@ use serenity::{
 };
 
 use songbird::SerenityInit;
-use songbird::{
-    input::{self
-            , restartable::Restartable,
-    },
-    Event, Driver, EventContext, EventHandler as VoiceEventHandler, Songbird, TrackEvent, Call,
-};
 
 
 use url::Url;
@@ -30,16 +23,14 @@ use std::{sync::Arc, time::Duration,
               atomic::{AtomicUsize, Ordering},
           }, };
 use std::alloc::handle_alloc_error;
-use std::ops::Deref;
 use serenity::model::id::GuildId;
 use songbird::driver::Bitrate;
 use songbird::driver::opus::ffi::opus_get_version_string;
-use url::quirks::protocol;
 use crate::utils::check_msg;
 
 #[command]
 #[only_in(guilds)]
-pub async fn queue(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+pub async fn skip(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild = msg
         .guild(&ctx.cache)
         .unwrap();
@@ -59,8 +50,11 @@ pub async fn queue(ctx: &Context, msg: &Message, mut args: Args) -> CommandResul
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
         let queue = handler.queue();
+        let _ = queue.skip();
+
+        check_msg(msg.channel_id.say(&ctx.http, format!("Song skipped: {} in queue.", queue.len())).await);
     } else {
-        check_msg(msg.channel_id.say(&ctx.http, "Not in a voice channel to pause in").await);
+        check_msg(msg.channel_id.say(&ctx.http, "Not in a voice channel to play in").await);
     }
     Ok(())
 }
